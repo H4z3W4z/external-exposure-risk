@@ -4,7 +4,7 @@ Turn externally observable attack-surface data into prioritized security risk us
 
 This Apify Actor answers: **Which externally observable exposures deserve attention first, and why?** It combines existing service observations with exact CVE intelligence, produces explainable priorities, and preserves the evidence needed to investigate. It makes no requests to target HTTP/TLS services and performs no active scans.
 
-**Status:** V1 implementation with 94 automated tests, bounded portfolio stress verification, recovery support, deployment preparation, and public-source smoke verification. Live customer-key Shodan and hosted Apify acceptance runs are still required. Paid public release is gated on the [Shodan licensing review](docs/SHODAN_LICENSING.md).
+**Status:** V1 implementation with 95 automated tests, bounded portfolio stress verification, recovery support, deployment preparation, and public-source smoke verification. A private hosted build and two-domain live Shodan acceptance run passed; see [live acceptance results](docs/LIVE_ACCEPTANCE.md). Production/customer-key and representative portfolio validation remain required. Paid public release is gated on the [Shodan licensing review](docs/SHODAN_LICENSING.md).
 
 ## What it does
 

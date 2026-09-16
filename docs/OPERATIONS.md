@@ -50,7 +50,7 @@ npm run deploy -- --apply
 unset APIFY_TOKEN
 ```
 
-Apply creates the named private Actor or updates the matching repository archive version (or migrates an existing Git source for that repository) of an existing private Actor. It refuses public Actors and conflicting version sources. SDK mutations are not automatically retried: after an ambiguous failure, inspect the account before retrying. `artifacts/deployment.json` records the Actor/build IDs and console URL. `build_started` means accepted for building; it does not mean the build succeeded. Inspect the build result in Apify, then configure the Shodan runtime secret and perform acceptance runs. This automation does not publish, configure billing, inject Shodan credentials, or run targets. Hosted build/run verification and licensing review remain release gates.
+Apply creates the named private Actor or updates the matching repository archive version (or migrates an existing Git source for that repository) of an existing private Actor. It refuses public Actors and conflicting version sources. SDK mutations are not automatically retried: after an ambiguous failure, inspect the account before retrying. `artifacts/deployment.json` records the Actor/build IDs and console URL. `build_started` means accepted for building; it does not mean the build succeeded. Inspect the build result in Apify, then configure the Shodan runtime secret and perform acceptance runs. This automation does not publish, configure billing, inject Shodan credentials, or run targets. A small private hosted acceptance run has passed; representative production validation and licensing review remain release gates.
 
 ## Cost calculator
 
