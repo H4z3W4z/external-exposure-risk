@@ -4,7 +4,7 @@ import { ProviderError } from '../http.js';
 import type { Metrics } from '../metrics.js';
 import { obj, str, strings, cveId, timestamp } from './parse.js';
 import type { Asset, ServiceObservation, VulnerabilityAssociation } from '../models.js';
-import { publicIp } from '../discovery/dns.js';
+import { publicIp, canonicalIp } from '../discovery/dns.js';
 
 export interface HostResult { asset: Asset | null; warnings: string[]; truncated: boolean }
 export interface RelatedResult { ips: string[]; warnings: string[]; truncated: boolean }
@@ -24,11 +24,11 @@ export function associations(v: unknown): VulnerabilityAssociation[] {
 }
 export function normalizeHost(raw: unknown, ip: string, fetchedAt: string, maxServices: number): HostResult {
   const host = obj(raw);
-  if (host.ip_str !== ip || !Array.isArray(host.data)) throw new ProviderError('shodan', 'INVALID_RESPONSE');
+  if (!canonicalIp(ip) || canonicalIp(host.ip_str) !== canonicalIp(ip) || !Array.isArray(host.data)) throw new ProviderError('shodan', 'INVALID_RESPONSE');
   const warnings: string[] = []; const groups = new Map<string, ServiceObservation[]>();
   for (const row of host.data) {
     const r = obj(row);
-    if (typeof r.port !== 'number' || !Number.isInteger(r.port) || r.port < 1 || r.port > 65535 || (r.ip_str && r.ip_str !== ip)) {
+    if (typeof r.port !== 'number' || !Number.isInteger(r.port) || r.port < 1 || r.port > 65535 || (r.ip_str && canonicalIp(r.ip_str) !== canonicalIp(ip))) {
       warnings.push('A malformed Shodan service was excluded.'); continue;
     }
     const transport = ['tcp','udp'].includes(String(r.transport)) ? String(r.transport) : null;
@@ -103,7 +103,7 @@ export class ShodanProvider implements ExposureProvider {
     this.metrics.counts.shodanSearchPages++;
     this.metrics.counts.shodanResultsConsumed += raw.matches.length;
     const ips = raw.matches.filter(row => strings(obj(row).hostnames).some(h => { const n = h.toLowerCase().replace(/\.$/, ''); return n === domain || n.endsWith(`.${domain}`); }))
-      .map(row => str(obj(row).ip_str)).filter((ip): ip is string => !!ip && publicIp(ip));
+      .map(row => canonicalIp(obj(row).ip_str)).filter((ip): ip is string => !!ip && publicIp(ip));
     const truncated = typeof raw.total === 'number' && raw.total > raw.matches.length;
     return { ips: [...new Set(ips)].sort(), truncated,
       warnings: ['Related hosts are based on historical Shodan hostnames, not proven ownership.', ...(truncated ? ['Related-host search limited to its first page; discovery is incomplete.'] : [])] };

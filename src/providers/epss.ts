@@ -5,6 +5,7 @@ import { PublicCache, DAY_MS, type CacheEntry } from '../cache.js';
 import type { EpssEntry, SourceInfo } from '../models.js';
 import { obj, cveId, date } from './parse.js';
 export const EPSS_URL = 'https://api.first.org/data/v1/epss';
+const numeric = (v: unknown): number => typeof v === 'number' || (typeof v === 'string' && v.trim() !== '') ? Number(v) : NaN;
 const valid = (v: unknown): v is EpssEntry => {
   const r = obj(v);
   return !!cveId(r.cve) && typeof r.probability === 'number' && Number.isFinite(r.probability) && r.probability >= 0 && r.probability <= 1 &&
@@ -16,7 +17,7 @@ export function parseEpss(raw: unknown, requested: string[]): Record<string, Eps
   const entries: Record<string, EpssEntry> = {};
   for (const row of r.data) {
     const v = obj(row); const cve = cveId(v.cve);
-    const entry = { cve, probability: v.epss === '' || v.epss == null ? NaN : Number(v.epss), percentile: v.percentile === '' || v.percentile == null ? NaN : Number(v.percentile), date: v.date };
+    const entry = { cve, probability: numeric(v.epss), percentile: numeric(v.percentile), date: v.date };
     if (!valid(entry) || !requested.includes(entry.cve)) throw new ProviderError('epss', 'INVALID_RESPONSE');
     entries[entry.cve] = entry;
   }

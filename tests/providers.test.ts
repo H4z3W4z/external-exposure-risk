@@ -13,6 +13,8 @@ test('normalizes services, versions, CPE, CVE object/list and UTC Shodan timesta
   assert.deepEqual(associations([CVE, CVE, 'not-a-cve']), [{ cve: CVE, providerVerified: null }]);
   assert.equal(associations({ [CVE]: { verified: false } })[0].providerVerified, false);
   assert.equal(JSON.stringify(r).includes('raw-banner'), false);
+  const ipv6 = normalizeHost(hostRaw({ ip_str: '2606:4700:4700:0:0:0:0:1111', data: [{ port: 443, ip_str: '2606:4700:4700::1111' }] }), '2606:4700:4700::1111', NOW, 200);
+  assert.equal(ipv6.asset!.services.length, 1);
 });
 test('dedup retains latest service and does not move historical CVEs to newer observations', () => {
   const old = hostRaw().data[0]; const recent = { ...old, timestamp: '2026-09-15T00:00:00', vulns: {}, version: '2.0' };
@@ -80,7 +82,7 @@ test('bad cache and persistent storage failures do not stop fresh retrieval', as
 test('EPSS preserves zero, missing and invalid scores distinctly', () => {
   assert.equal(parseEpss({ status: 'OK', data: [{ ...epssRaw.data[0], epss: '0' }] }, [CVE])[CVE].probability, 0);
   assert.deepEqual(parseEpss({ status: 'OK', data: [] }, [CVE]), {});
-  for (const value of ['NaN', '-1', '1.1', '', null, undefined]) assert.throws(() => parseEpss({ status: 'OK', data: [{ ...epssRaw.data[0], epss: value }] }, [CVE]));
+  for (const value of ['NaN', '-1', '1.1', '', ' ', null, undefined, true, false, [], {}]) assert.throws(() => parseEpss({ status: 'OK', data: [{ ...epssRaw.data[0], epss: value }] }, [CVE]));
   assert.throws(() => parseEpss(epssRaw, ['CVE-2024-9999']));
 });
 test('EPSS batches only requested unique CVEs, caches, and avoids calls for empty input', async () => {

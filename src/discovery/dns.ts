@@ -3,6 +3,9 @@ import ipaddr from 'ipaddr.js';
 import type { Metrics } from '../metrics.js';
 export interface DnsResult { ips: string[]; warnings: string[]; partial: boolean }
 export interface DomainResolver { resolve(domain: string): Promise<DnsResult> }
+export function canonicalIp(ip: unknown): string | null {
+  try { return typeof ip === 'string' ? ipaddr.process(ip).toString() : null; } catch { return null; }
+}
 export function publicIp(ip: string): boolean {
   try { return ipaddr.process(ip).range() === 'unicast'; } catch { return false; }
 }
@@ -20,7 +23,7 @@ export class DnsResolver implements DomainResolver {
       }
     }
     if (ips.some(ip => !publicIp(ip))) warnings.push('Non-public DNS addresses were excluded from Shodan lookups.');
-    const valid = [...new Set(ips.filter(publicIp))].sort();
+    const valid = [...new Set(ips.filter(publicIp).map(ip => canonicalIp(ip)!))].sort();
     if (!valid.length) warnings.push('No public A or AAAA records were resolved. This does not establish absence of external exposure.');
     return { ips: valid, warnings: [...new Set(warnings)], partial };
   }
