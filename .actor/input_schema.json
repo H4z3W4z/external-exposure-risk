@@ -1,0 +1,18 @@
+{
+  "title": "External Exposure Risk input",
+  "description": "Analyze up to 100 domains using existing Shodan observations. CVE associations do not confirm vulnerability.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "domains": { "title": "Domains", "type": "array", "description": "Bare domain names, without URLs or paths. Provide domains or domain, not both.", "editor": "stringList", "items": { "type": "string" }, "prefill": ["example.com"], "minItems": 1, "maxItems": 100 },
+    "domain": { "title": "Single domain (API shorthand)", "type": "string", "description": "Alternative to domains; leave empty/omit when using domains.", "editor": "textfield" },
+    "shodanApiKey": { "title": "Your Shodan API key", "type": "string", "description": "Customer-supplied secret. Alternatively configure SHODAN_API_KEY as a secret environment variable.", "editor": "textfield", "isSecret": true },
+    "discoverRelatedHosts": { "title": "Discover related hosts", "type": "boolean", "description": "Optional first-page hostname search; may consume Shodan query credits. Historical hostnames do not prove ownership.", "default": false },
+    "maxIpsPerDomain": { "title": "Maximum IPs per domain", "type": "integer", "description": "Cap DNS and related-host lookups per domain. Truncation is reported.", "default": 20, "minimum": 1, "maximum": 100 },
+    "maxServicesPerIp": { "title": "Maximum services per IP", "type": "integer", "description": "Cap analyzed services per IP; this does not reduce the Shodan host response size.", "default": 200, "minimum": 1, "maximum": 1000 },
+    "maxCvesPerDomain": { "title": "Maximum EPSS enrichments per domain", "type": "integer", "description": "Cap EPSS enrichment. All observed CVE associations still receive exact KEV correlation.", "default": 2000, "minimum": 1, "maximum": 5000 },
+    "staleAfterDays": { "title": "Observation freshness window (days)", "type": "integer", "description": "Older observations have low confidence and cannot receive high priority.", "default": 30, "minimum": 1, "maximum": 365 },
+    "highEpssThreshold": { "title": "High EPSS probability threshold", "type": "number", "description": "Probability from 0 to 1, not percentile. Used only with fresh EPSS and credible service evidence.", "default": 0.9, "minimum": 0, "maximum": 1 }
+  },
+  "required": []
+}

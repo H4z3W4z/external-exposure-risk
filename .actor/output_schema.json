@@ -1,0 +1,9 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Exposure priorities and evidence",
+  "properties": {
+    "results": { "type": "string", "title": "Domain assessments", "template": "{{links.apiDefaultDatasetUrl}}/items" },
+    "summary": { "type": "string", "title": "Readable summary", "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/SUMMARY" },
+    "diagnostics": { "type": "string", "title": "Usage and cost diagnostics", "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DIAGNOSTICS" }
+  }
+}

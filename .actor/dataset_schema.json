@@ -1,0 +1,421 @@
+{
+  "actorSpecification": 1,
+  "fields": {
+    "type": "object",
+    "required": [
+      "schemaVersion",
+      "domain",
+      "analyzedAt",
+      "status",
+      "summary",
+      "priorities",
+      "assets",
+      "sources",
+      "warnings",
+      "humanSummary"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "const": "1.0"
+      },
+      "domain": {
+        "type": "string"
+      },
+      "analyzedAt": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "ok",
+          "partial",
+          "no_data",
+          "failed"
+        ]
+      },
+      "summary": {
+        "type": "object",
+        "required": [
+          "assetsObserved",
+          "servicesObserved",
+          "cveAssociations",
+          "uniqueCves",
+          "kevMatches",
+          "highEpss",
+          "criticalPriority",
+          "highPriority"
+        ],
+        "properties": {
+          "assetsObserved": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "servicesObserved": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cveAssociations": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueCves": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kevMatches": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "highEpss": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "criticalPriority": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "highPriority": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "priorities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "host",
+            "ip",
+            "confidenceRationale",
+            "reason",
+            "recommendedAction",
+            "transport",
+            "product",
+            "version",
+            "cve",
+            "epssDate",
+            "observedAt",
+            "priority",
+            "confidence",
+            "port",
+            "cpe",
+            "cisaKev",
+            "knownRansomwareUse",
+            "epss",
+            "epssPercentile",
+            "observationAgeDays",
+            "stale",
+            "applicability",
+            "correlationMethod",
+            "observationSource",
+            "evidence"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "host": {
+              "type": "string"
+            },
+            "ip": {
+              "type": "string"
+            },
+            "confidenceRationale": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "recommendedAction": {
+              "type": "string"
+            },
+            "transport": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "product": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cve": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "epssDate": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "observedAt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "priority": {
+              "enum": [
+                "CRITICAL_PRIORITY",
+                "HIGH_PRIORITY",
+                "MEDIUM_PRIORITY",
+                "INFORMATIONAL",
+                "INSUFFICIENT_EVIDENCE"
+              ]
+            },
+            "confidence": {
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW"
+              ]
+            },
+            "port": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 65535
+            },
+            "cpe": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "cisaKev": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "knownRansomwareUse": {
+              "enum": [
+                true,
+                null
+              ]
+            },
+            "epss": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "epssPercentile": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "observationAgeDays": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "stale": {
+              "type": "boolean"
+            },
+            "applicability": {
+              "enum": [
+                "OBSERVED",
+                "ASSOCIATED"
+              ]
+            },
+            "correlationMethod": {
+              "enum": [
+                "EXACT_CVE",
+                "OBSERVATION_ONLY"
+              ]
+            },
+            "observationSource": {
+              "const": "Shodan"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "url",
+                  "fetchedAt",
+                  "observedAt",
+                  "details"
+                ],
+                "properties": {
+                  "source": {
+                    "enum": [
+                      "Shodan",
+                      "CISA KEV",
+                      "FIRST EPSS"
+                    ]
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "fetchedAt": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "observedAt": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "assets": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "ip",
+            "attribution",
+            "hostnames",
+            "services",
+            "hostAssociations"
+          ],
+          "properties": {
+            "ip": {
+              "type": "string"
+            },
+            "attribution": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "dns",
+                  "shodan_hostname"
+                ]
+              }
+            },
+            "hostnames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "services": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "hostAssociations": {
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "sources": {
+        "type": "object",
+        "required": [
+          "dns",
+          "shodan",
+          "kev",
+          "epss"
+        ],
+        "properties": {
+          "dns": {
+            "type": "object"
+          },
+          "shodan": {
+            "type": "object"
+          },
+          "kev": {
+            "type": "object"
+          },
+          "epss": {
+            "type": "object"
+          }
+        }
+      },
+      "warnings": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "humanSummary": {
+        "type": "string"
+      }
+    }
+  },
+  "views": {
+    "overview": {
+      "title": "Domain priorities",
+      "transformation": {
+        "fields": [
+          "domain",
+          "status",
+          "summary.assetsObserved",
+          "summary.servicesObserved",
+          "summary.cveAssociations",
+          "summary.kevMatches",
+          "summary.highPriority",
+          "humanSummary"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "domain": {
+            "label": "domain"
+          },
+          "status": {
+            "label": "status"
+          },
+          "summary.assetsObserved": {
+            "label": "assetsObserved"
+          },
+          "summary.servicesObserved": {
+            "label": "servicesObserved"
+          },
+          "summary.cveAssociations": {
+            "label": "cveAssociations"
+          },
+          "summary.kevMatches": {
+            "label": "kevMatches"
+          },
+          "summary.highPriority": {
+            "label": "highPriority"
+          },
+          "humanSummary": {
+            "label": "humanSummary"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0",
+  "domain": "example.com",
+  "analyzedAt": "2026-09-15T12:00:00.000Z",
+  "status": "ok",
+  "summary": {
+    "assetsObserved": 1,
+    "servicesObserved": 1,
+    "cveAssociations": 1,
+    "uniqueCves": 1,
+    "kevMatches": 1,
+    "highEpss": 1,
+    "criticalPriority": 0,
+    "highPriority": 1
+  },
+  "priorities": [
+    {
+      "id": "7fc17f4bf158dbb512de",
+      "priority": "HIGH_PRIORITY",
+      "host": "example.com",
+      "ip": "203.0.113.10",
+      "port": 443,
+      "transport": "tcp",
+      "product": "Example Gateway",
+      "version": "1.2.3",
+      "cpe": [
+        "cpe:/a:example:gateway:1.2.3"
+      ],
+      "cve": "CVE-2024-0001",
+      "cisaKev": true,
+      "knownRansomwareUse": true,
+      "epss": 0.968,
+      "epssPercentile": 0.99,
+      "epssDate": "2026-09-15",
+      "confidence": "HIGH",
+      "confidenceRationale": "Recent explicit CVE association or structured product/version/CPE observation. Confidence concerns the observation/association, not confirmed vulnerability.",
+      "applicability": "ASSOCIATED",
+      "correlationMethod": "EXACT_CVE",
+      "observationSource": "Shodan",
+      "observedAt": "2026-09-14T12:00:00.000Z",
+      "observationAgeDays": 1,
+      "stale": false,
+      "reason": "Exact CVE match in CISA KEV indicates known exploitation in the wild. Investigate applicability promptly. This does not confirm exploitation or vulnerability of this endpoint. CISA reports known ransomware campaign use of this CVE.",
+      "recommendedAction": "Verify current exposure, asset ownership, installed version, affected-version range, configuration, and remediation status. Follow vendor guidance if affected.",
+      "evidence": [
+        {
+          "source": "Shodan",
+          "url": "https://www.shodan.io/host/203.0.113.10",
+          "fetchedAt": "2026-09-15T12:00:00.000Z",
+          "observedAt": "2026-09-14T12:00:00.000Z",
+          "details": {
+            "ip": "203.0.113.10",
+            "port": 443,
+            "transport": "tcp",
+            "protocol": null,
+            "product": "Example Gateway",
+            "version": "1.2.3",
+            "cpe": [
+              "cpe:/a:example:gateway:1.2.3"
+            ],
+            "cve": "CVE-2024-0001",
+            "scope": "service",
+            "providerVerified": true,
+            "applicabilityVerified": false,
+            "conflictingEvidence": false
+          }
+        },
+        {
+          "source": "CISA KEV",
+          "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+          "fetchedAt": "2026-09-15T12:00:00.000Z",
+          "observedAt": "2026-09-15T12:00:00.000Z",
+          "details": {
+            "cve": "CVE-2024-0001",
+            "vendorProject": "Example",
+            "product": "Example Gateway",
+            "vulnerabilityName": "Synthetic test vulnerability",
+            "dateAdded": "2026-09-14",
+            "dueDate": "2026-10-01",
+            "knownRansomwareCampaignUse": "Known",
+            "requiredAction": "Follow vendor guidance.",
+            "notes": "Synthetic fixture; not intelligence about a real CVE.",
+            "sourceState": "fresh",
+            "correlationMethod": "EXACT_CVE"
+          }
+        },
+        {
+          "source": "FIRST EPSS",
+          "url": "https://api.first.org/data/v1/epss?cve=CVE-2024-0001",
+          "fetchedAt": "2026-09-15T12:00:00.000Z",
+          "observedAt": "2026-09-15",
+          "details": {
+            "cve": "CVE-2024-0001",
+            "probability": 0.968,
+            "percentile": 0.99,
+            "date": "2026-09-15",
+            "sourceState": "fresh",
+            "correlationMethod": "EXACT_CVE"
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "ip": "203.0.113.10",
+      "attribution": [
+        "dns"
+      ],
+      "hostnames": [
+        "vpn.example.com"
+      ],
+      "organization": "Synthetic Example",
+      "asn": "AS15169",
+      "isp": null,
+      "location": {
+        "country": null,
+        "region": null,
+        "city": null
+      },
+      "services": [
+        {
+          "ip": "203.0.113.10",
+          "port": 443,
+          "transport": "tcp",
+          "protocol": null,
+          "hostnames": [],
+          "product": "Example Gateway",
+          "version": "1.2.3",
+          "cpe": [
+            "cpe:/a:example:gateway:1.2.3"
+          ],
+          "observedAt": "2026-09-14T12:00:00.000Z",
+          "fetchedAt": "2026-09-15T12:00:00.000Z",
+          "associations": [
+            {
+              "cve": "CVE-2024-0001",
+              "providerVerified": true
+            }
+          ],
+          "scope": "service",
+          "conflictingEvidence": false
+        }
+      ],
+      "hostAssociations": null
+    }
+  ],
+  "sources": {
+    "dns": {
+      "resolvedAt": "2026-09-15T12:00:00.000Z",
+      "addresses": [
+        "203.0.113.10"
+      ]
+    },
+    "shodan": {
+      "fetchedAt": "2026-09-15T12:00:00.000Z",
+      "state": "available",
+      "attribution": "Observation data: Shodan. Shodan retains ownership and copyright in its materials. Prioritization is independently derived; no endorsement is implied."
+    },
+    "kev": {
+      "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "fetchedAt": "2026-09-15T12:00:00.000Z",
+      "dataDate": "2026-09-15T12:00:00.000Z",
+      "state": "fresh",
+      "cacheAgeSeconds": 0
+    },
+    "epss": {
+      "CVE-2024-0001": {
+        "url": "https://api.first.org/data/v1/epss",
+        "fetchedAt": "2026-09-15T12:00:00.000Z",
+        "dataDate": "2026-09-15",
+        "state": "fresh",
+        "cacheAgeSeconds": 0
+      }
+    }
+  },
+  "warnings": [
+    "DNS and historical hostnames associate infrastructure with a domain; they do not prove ownership. Shared hosting/CDNs may expose unrelated services.",
+    "SYNTHETIC DEMO: no network calls were made; this is not an assessment of example.com or a real CVE."
+  ],
+  "humanSummary": "example.com — ok\n1 assets; 1 services; 1 CVE associations (1 unique); 1 KEV matches; 1 fresh high-EPSS associations.\nInvestigate first:\n- HIGH_PRIORITY: 203.0.113.10:443/tcp — CVE-2024-0001; confidence HIGH. Exact CVE match in CISA KEV indicates known exploitation in the wild. Investigate applicability promptly. This does not confirm exploitation or vulnerability of this endpoint. CISA reports known ransomware campaign use of this CVE. Last observed: 2026-09-14T12:00:00.000Z (1 day ago). Verify current exposure, asset ownership, installed version, affected-version range, configuration, and remediation status. Follow vendor guidance if affected.\nCaveats:\n- DNS and historical hostnames associate infrastructure with a domain; they do not prove ownership. Shared hosting/CDNs may expose unrelated services.\n- SYNTHETIC DEMO: no network calls were made; this is not an assessment of example.com or a real CVE.\nObservation data: Shodan. Shodan retains ownership and copyright in its materials. Prioritization is independently derived; no endorsement is implied."
+}

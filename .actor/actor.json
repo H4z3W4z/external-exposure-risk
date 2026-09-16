@@ -1,0 +1,16 @@
+{
+  "actorSpecification": 1,
+  "name": "external-exposure-risk",
+  "title": "External Exposure Risk Actor",
+  "description": "Prioritize externally observed services and CVE associations with Shodan, CISA KEV, EPSS, confidence and evidence.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "dockerfile": "../Dockerfile",
+  "readme": "../README.md",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": { "dataset": "./dataset_schema.json" },
+  "defaultMemoryMbytes": 256,
+  "minMemoryMbytes": 256,
+  "maxMemoryMbytes": 1024
+}

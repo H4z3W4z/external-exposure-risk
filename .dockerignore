@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.env*
+.apify
+storage
+artifacts
+coverage
+*.log

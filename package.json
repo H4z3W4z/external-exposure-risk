@@ -1,0 +1,30 @@
+{
+  "name": "external-exposure-risk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evidence-backed external exposure prioritization using Shodan, CISA KEV and FIRST EPSS",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit && npm test",
+    "demo": "tsx scripts/demo.ts",
+    "smoke:public": "tsx scripts/smoke-public.ts",
+    "smoke:docker": "node scripts/smoke-docker.mjs"
+  },
+  "dependencies": {
+    "apify": "3.7.2",
+    "ipaddr.js": "2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "ajv": "8.20.0",
+    "tsx": "4.23.13",
+    "typescript": "~5.9.3"
+  }
+}
