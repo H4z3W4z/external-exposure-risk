@@ -6,8 +6,9 @@ import { KEV_URL } from './providers/cisa-kev.js';
 import type { EpssProvider } from './providers/epss.js';
 import type { Metrics } from './metrics.js';
 import type { Asset, DomainRecord, Intelligence } from './models.js';
-import { prioritize, sortFindings } from './priority.js';
+import { iterateFindings } from './priority.js';
 import { ProviderError } from './http.js';
+import { FindingSelection, fitRecord, MAX_ASSOCIATIONS, MAX_OBSERVATION_BYTES, MAX_SERVICES } from './output.js';
 
 export interface Dependencies {
   dns: DomainResolver; shodan: ExposureProvider;
@@ -18,6 +19,7 @@ export async function analyzeDomain(domain: string, input: Input, deps: Dependen
   const analyzedAt = (deps.now?.() ?? new Date()).toISOString();
   const warnings = ['DNS and historical hostnames associate infrastructure with a domain; they do not prove ownership. Shared hosting/CDNs may expose unrelated services.'];
   const assets: Asset[] = []; let partial = false; let providerFailed = false;
+  let observationBytes = 0; let associationCount = 0; let serviceCount = 0; let analysisLimited = false;
   let dns = { ips: [] as string[], warnings: [] as string[], partial: false };
   try { dns = await deps.dns.resolve(domain); }
   catch { dns.partial = true; dns.warnings.push('DNS lookup failed.'); deps.metrics.error('dns.UNAVAILABLE'); }
@@ -32,13 +34,27 @@ export async function analyzeDomain(domain: string, input: Input, deps: Dependen
   const ips = [...new Set([...dns.ips.slice().sort(), ...related.slice().sort()])];
   if (ips.length > input.maxIpsPerDomain) { partial = true; warnings.push('IP limit reached; remaining addresses were not assessed.'); }
   for (const ip of ips.slice(0, input.maxIpsPerDomain)) {
+    if (analysisLimited) break;
+    if (observationBytes >= MAX_OBSERVATION_BYTES || associationCount >= MAX_ASSOCIATIONS || serviceCount >= MAX_SERVICES) { analysisLimited = true; partial = true; break; }
     try {
       const result = await deps.shodan.host(ip, input.maxServicesPerIp);
       warnings.push(...result.warnings); partial ||= result.truncated;
       if (result.asset) {
         const asset = structuredClone(result.asset);
         asset.attribution = [...(dns.ips.includes(ip) ? ['dns' as const] : []), ...(related.includes(ip) ? ['shodan_hostname' as const] : [])];
-        assets.push(asset);
+        const retained = [];
+        const candidates = [...asset.services, ...(asset.hostAssociations ? [asset.hostAssociations] : [])];
+        for (const service of candidates) {
+          const bytes = Buffer.byteLength(JSON.stringify(service));
+          if (observationBytes + bytes > MAX_OBSERVATION_BYTES || associationCount + service.associations.length > MAX_ASSOCIATIONS || serviceCount >= MAX_SERVICES) {
+            analysisLimited = true; partial = true; break;
+          }
+          observationBytes += bytes; associationCount += service.associations.length; serviceCount++;
+          retained.push(service);
+        }
+        asset.services = retained.filter(s => s.scope === 'service');
+        asset.hostAssociations = retained.find(s => s.scope === 'host') ?? null;
+        if (retained.length) assets.push(asset);
       }
     } catch (e) {
       partial = true; providerFailed = true;
@@ -47,6 +63,7 @@ export async function analyzeDomain(domain: string, input: Input, deps: Dependen
       deps.metrics.error(`analysis.shodan.${code}`);
     }
   }
+  if (analysisLimited) warnings.push('Per-domain analysis budget reached (8 MB observations, 20,000 associations, or 5,000 observations); unassessed observations and IPs may contain additional priorities.');
   assets.sort((a, b) => a.ip.localeCompare(b.ip));
   const observations = assets.flatMap(a => [...a.services, ...(a.hostAssociations ? [a.hostAssociations] : [])]);
   const allCves = [...new Set(observations.flatMap(s => s.associations.map(a => a.cve)))].sort();
@@ -59,25 +76,35 @@ export async function analyzeDomain(domain: string, input: Input, deps: Dependen
     partial ||= kev.source.state !== 'fresh' || Object.values(epss.sources).some(s => s.state !== 'fresh');
     warnings.push(...intel.warnings);
   }
-  const priorities = sortFindings(observations.flatMap(s => prioritize(domain, s, intel, input, analyzedAt)));
-  const staleCount = priorities.filter(f => f.stale).length;
+  const selection = new FindingSelection();
+  let staleCount = 0; let incompleteVersion = false; let kevMatches = 0; let highEpss = 0; let criticalPriority = 0; let highPriority = 0;
+  for (const observation of observations) for (const finding of iterateFindings(domain, observation, intel, input, analyzedAt)) {
+    if (finding.stale) staleCount++;
+    if (finding.cve && (!finding.product || !finding.version)) incompleteVersion = true;
+    if (finding.cisaKev === true) kevMatches++;
+    if (finding.epss !== null && finding.epss >= input.highEpssThreshold && finding.cve && intel.epssSources[finding.cve]?.state === 'fresh') highEpss++;
+    if (finding.priority === 'CRITICAL_PRIORITY') criticalPriority++;
+    if (finding.priority === 'HIGH_PRIORITY') highPriority++;
+    selection.add(finding);
+  }
+  const priorities = selection.finish();
   if (staleCount) warnings.push(`${staleCount} findings have stale, missing, or future-dated observations. Verify current exposure before treating them as current.`);
-  if (priorities.some(f => f.cve && (!f.version || !f.product))) warnings.push('Some CVE associations lack product/version evidence. Affected-version applicability is unverified.');
+  if (incompleteVersion) warnings.push('Some CVE associations lack product/version evidence. Affected-version applicability is unverified.');
   if (!assets.length) warnings.push('Insufficient evidence: no usable service observations. No findings does not mean no risk.');
   const summary = { assetsObserved: assets.length, servicesObserved: assets.reduce((n, a) => n + a.services.length, 0),
-    cveAssociations: priorities.filter(p => p.cve).length, uniqueCves: allCves.length,
-    kevMatches: priorities.filter(p => p.cisaKev === true).length,
-    highEpss: priorities.filter(p => p.epss !== null && p.epss >= input.highEpssThreshold && p.cve && intel.epssSources[p.cve]?.state === 'fresh').length,
-    criticalPriority: priorities.filter(p => p.priority === 'CRITICAL_PRIORITY').length,
-    highPriority: priorities.filter(p => p.priority === 'HIGH_PRIORITY').length };
+    cveAssociations: associationCount, uniqueCves: allCves.length, kevMatches, highEpss, criticalPriority, highPriority };
   const status = !assets.length ? providerFailed || dns.partial ? 'failed' : partial ? 'partial' : 'no_data' : partial ? 'partial' : 'ok';
   const record: DomainRecord = { schemaVersion: '1.0', domain, analyzedAt, status, summary, priorities, assets,
     sources: { dns: { resolvedAt: analyzedAt, addresses: dns.ips }, shodan: { fetchedAt: analyzedAt, state: providerFailed ? assets.length ? 'partial' : 'unavailable' : 'available', attribution: 'Observation data: Shodan. Shodan retains ownership and copyright in its materials. Prioritization is independently derived; no endorsement is implied.' }, kev: intel.kevSource, epss: intel.epssSources },
-    warnings: [...new Set(warnings)].sort(), humanSummary: '' };
+    warnings: [...new Set(warnings)].sort(), humanSummary: '',
+    output: { truncated: false, limitBytes: 0, serializedBytes: 0, findingsAssessed: selection.total,
+      findingsRetained: priorities.length, findingsOmitted: selection.total - priorities.length, assetsOmitted: 0, summaryScope: 'assessed_observations', analysisLimited } };
   record.humanSummary = humanSummary(record);
   deps.metrics.counts.domainsAnalyzed++;
   if (assets.length) deps.metrics.counts.domainsWithObservations++;
-  return record;
+  const fitted = fitRecord(record);
+  if (fitted.output!.truncated) deps.metrics.counts.recordsTruncated++;
+  return fitted;
 }
 export function humanSummary(record: DomainRecord): string {
   const s = record.summary;

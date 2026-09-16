@@ -5,6 +5,7 @@ import type { Metrics } from '../metrics.js';
 import { obj, str, strings, cveId, timestamp } from './parse.js';
 import type { Asset, ServiceObservation, VulnerabilityAssociation } from '../models.js';
 import { publicIp, canonicalIp } from '../discovery/dns.js';
+import { BoundedCache } from '../bounded-cache.js';
 
 export interface HostResult { asset: Asset | null; warnings: string[]; truncated: boolean }
 export interface RelatedResult { ips: string[]; warnings: string[]; truncated: boolean }
@@ -26,10 +27,11 @@ export function normalizeHost(raw: unknown, ip: string, fetchedAt: string, maxSe
   const host = obj(raw);
   if (!canonicalIp(ip) || canonicalIp(host.ip_str) !== canonicalIp(ip) || !Array.isArray(host.data)) throw new ProviderError('shodan', 'INVALID_RESPONSE');
   const warnings: string[] = []; const groups = new Map<string, ServiceObservation[]>();
+  let malformed = false;
   for (const row of host.data) {
     const r = obj(row);
     if (typeof r.port !== 'number' || !Number.isInteger(r.port) || r.port < 1 || r.port > 65535 || (r.ip_str && canonicalIp(r.ip_str) !== canonicalIp(ip))) {
-      warnings.push('A malformed Shodan service was excluded.'); continue;
+      malformed = true; warnings.push('A malformed Shodan service was excluded.'); continue;
     }
     const transport = ['tcp','udp'].includes(String(r.transport)) ? String(r.transport) : null;
     const s: ServiceObservation = { ip, port: r.port, transport, protocol: str(obj(r._shodan).module),
@@ -48,8 +50,8 @@ export function normalizeHost(raw: unknown, ip: string, fetchedAt: string, maxSe
     if (conflict) warnings.push('Conflicting observations at the same endpoint and timestamp; selected deterministically and reduced confidence.');
     return { ...newest, conflictingEvidence: conflict };
   }).sort((a, b) => a.port! - b.port! || (a.transport ?? '').localeCompare(b.transport ?? ''));
-  const truncated = all.length > maxServices;
-  if (truncated) warnings.push('Service limit reached; remaining services were not assessed.');
+  const truncated = malformed || all.length > maxServices;
+  if (all.length > maxServices) warnings.push('Service limit reached; remaining services were not assessed.');
   const services = all.slice(0, maxServices);
   const located = new Set(all.flatMap(s => s.associations.map(a => a.cve)));
   const unlocated = associations(host.vulns).filter(a => !located.has(a.cve));
@@ -65,9 +67,11 @@ export function normalizeHost(raw: unknown, ip: string, fetchedAt: string, maxSe
 }
 export class ShodanProvider implements ExposureProvider {
   // Per-instance run cache only: never share customer observations/credentials between runs.
-  private cache = new Map<string, HostResult>();
+  private cache: BoundedCache<HostResult>;
   private disabled: ProviderError | null = null;
-  constructor(private http: JsonHttp, private key: string, private metrics: Metrics, private now: () => Date = () => new Date()) {}
+  constructor(private http: JsonHttp, private key: string, private metrics: Metrics, private now: () => Date = () => new Date()) {
+    this.cache = new BoundedCache(8_000_000, 1000, () => this.metrics.counts.cacheEvictions++);
+  }
   private async get(path: string, params: Record<string, string> = {}) {
     if (this.disabled) throw this.disabled;
     const url = new URL(path, 'https://api.shodan.io');

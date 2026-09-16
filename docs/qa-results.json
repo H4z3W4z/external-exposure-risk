@@ -1,0 +1,290 @@
+{
+  "qa": {
+    "completedAt": "2026-09-16T04:28:39.623Z",
+    "status": "passed",
+    "tests": 94,
+    "checks": [
+      {
+        "name": "types-and-tests",
+        "status": "passed",
+        "seconds": 1.885
+      },
+      {
+        "name": "production-build",
+        "status": "passed",
+        "seconds": 0.644
+      },
+      {
+        "name": "synthetic-demo",
+        "status": "passed",
+        "seconds": 0.126
+      },
+      {
+        "name": "docker-build",
+        "status": "passed",
+        "seconds": 14.786
+      },
+      {
+        "name": "docker-lifecycle",
+        "status": "passed",
+        "seconds": 0.387
+      },
+      {
+        "name": "bounded-portfolio-stress",
+        "status": "passed",
+        "seconds": 20.304
+      },
+      {
+        "name": "deployment-dry-run",
+        "status": "passed",
+        "seconds": 0.266
+      },
+      {
+        "name": "cost-cli",
+        "status": "passed",
+        "seconds": 0.134
+      },
+      {
+        "name": "dependency-audit",
+        "status": "known_advisory_only"
+      },
+      {
+        "name": "whitespace",
+        "status": "passed",
+        "seconds": 0.003
+      },
+      {
+        "name": "source-secret-artifact-check",
+        "status": "passed",
+        "files": 61
+      }
+    ],
+    "limitations": [
+      "Live Shodan and hosted Apify verification not performed.",
+      "Known moderate stream-json advisory remains reviewed and documented.",
+      "Synthetic stress skips network and rate-limit latency."
+    ]
+  },
+  "stress": {
+    "generatedAt": "2026-09-16T04:28:38.203Z",
+    "memoryLimitMb": 256,
+    "reports": [
+      {
+        "profile": "shared",
+        "synthetic": true,
+        "networkRequests": 0,
+        "wireCalls": 3,
+        "rateLimitSleepsSkipped": true,
+        "limitation": "Core pipeline with synthetic DNS/HTTP/storage; runtime is not live throughput or an Apify bill.",
+        "domainsCompleted": 100,
+        "wallSeconds": 0.837,
+        "maxRecordBytes": 404937,
+        "totalRecordBytes": 40493450,
+        "findingsAssessed": 20000,
+        "findingsRetained": 20000,
+        "truncatedRecords": 0,
+        "analysisLimited": 0,
+        "diagnostics": {
+          "domainsSubmitted": 100,
+          "domainsUnique": 100,
+          "domainsAnalyzed": 100,
+          "domainsWithObservations": 100,
+          "shodanRequests": 1,
+          "shodanResultsConsumed": 20,
+          "shodanSearchPages": 0,
+          "dnsOperations": 200,
+          "kevRefreshes": 1,
+          "epssRequests": 1,
+          "cveRequests": 0,
+          "cacheHits": 1089,
+          "cacheMisses": 12,
+          "cacheStaleFallbacks": 0,
+          "cacheEvictions": 0,
+          "retries": 0,
+          "domainsResumed": 0,
+          "recordsTruncated": 0,
+          "runtimeSeconds": 0.837,
+          "peakMemoryBytes": 92319744,
+          "errors": {},
+          "resumed": false,
+          "usageMayBeIncomplete": false,
+          "apify": null,
+          "cost": {
+            "actualMarginalCostPerDomainUsd": null,
+            "observedApifyUsagePerDomainUsd": null,
+            "status": "incomplete",
+            "explanation": "Final Apify charges and customer Shodan costs are not available in-run. Usage is a snapshot, not final marginal cost. BYO Shodan charges are excluded."
+          },
+          "billing": {
+            "unit": "domain_analyzed",
+            "eligibleUnits": 100,
+            "chargedEvents": 0,
+            "enabled": false
+          }
+        }
+      },
+      {
+        "profile": "diverse",
+        "synthetic": true,
+        "networkRequests": 0,
+        "wireCalls": 402,
+        "rateLimitSleepsSkipped": true,
+        "limitation": "Core pipeline with synthetic DNS/HTTP/storage; runtime is not live throughput or an Apify bill.",
+        "domainsCompleted": 100,
+        "wallSeconds": 16.13,
+        "maxRecordBytes": 3819385,
+        "totalRecordBytes": 381292589,
+        "findingsAssessed": 800000,
+        "findingsRetained": 200000,
+        "truncatedRecords": 100,
+        "analysisLimited": 0,
+        "diagnostics": {
+          "domainsSubmitted": 100,
+          "domainsUnique": 100,
+          "domainsAnalyzed": 100,
+          "domainsWithObservations": 100,
+          "shodanRequests": 400,
+          "shodanResultsConsumed": 16000,
+          "shodanSearchPages": 0,
+          "dnsOperations": 200,
+          "kevRefreshes": 1,
+          "epssRequests": 1,
+          "cveRequests": 0,
+          "cacheHits": 4950,
+          "cacheMisses": 451,
+          "cacheStaleFallbacks": 0,
+          "cacheEvictions": 328,
+          "retries": 0,
+          "domainsResumed": 0,
+          "recordsTruncated": 100,
+          "runtimeSeconds": 16.13,
+          "peakMemoryBytes": 155336704,
+          "errors": {},
+          "resumed": false,
+          "usageMayBeIncomplete": false,
+          "apify": null,
+          "cost": {
+            "actualMarginalCostPerDomainUsd": null,
+            "observedApifyUsagePerDomainUsd": null,
+            "status": "incomplete",
+            "explanation": "Final Apify charges and customer Shodan costs are not available in-run. Usage is a snapshot, not final marginal cost. BYO Shodan charges are excluded."
+          },
+          "billing": {
+            "unit": "domain_analyzed",
+            "eligibleUnits": 100,
+            "chargedEvents": 0,
+            "enabled": false
+          }
+        }
+      },
+      {
+        "profile": "oversized",
+        "synthetic": true,
+        "networkRequests": 0,
+        "wireCalls": 5,
+        "rateLimitSleepsSkipped": true,
+        "limitation": "Core pipeline with synthetic DNS/HTTP/storage; runtime is not live throughput or an Apify bill.",
+        "domainsCompleted": 2,
+        "wallSeconds": 1.865,
+        "maxRecordBytes": 3745510,
+        "totalRecordBytes": 7491013,
+        "findingsAssessed": 40000,
+        "findingsRetained": 222,
+        "truncatedRecords": 2,
+        "analysisLimited": 2,
+        "diagnostics": {
+          "domainsSubmitted": 2,
+          "domainsUnique": 2,
+          "domainsAnalyzed": 2,
+          "domainsWithObservations": 2,
+          "shodanRequests": 2,
+          "shodanResultsConsumed": 400,
+          "shodanSearchPages": 0,
+          "dnsOperations": 4,
+          "kevRefreshes": 1,
+          "epssRequests": 2,
+          "cveRequests": 0,
+          "cacheHits": 100,
+          "cacheMisses": 103,
+          "cacheStaleFallbacks": 0,
+          "cacheEvictions": 1,
+          "retries": 0,
+          "domainsResumed": 0,
+          "recordsTruncated": 2,
+          "runtimeSeconds": 1.865,
+          "peakMemoryBytes": 153735168,
+          "errors": {},
+          "resumed": false,
+          "usageMayBeIncomplete": false,
+          "apify": null,
+          "cost": {
+            "actualMarginalCostPerDomainUsd": null,
+            "observedApifyUsagePerDomainUsd": null,
+            "status": "incomplete",
+            "explanation": "Final Apify charges and customer Shodan costs are not available in-run. Usage is a snapshot, not final marginal cost. BYO Shodan charges are excluded."
+          },
+          "billing": {
+            "unit": "domain_analyzed",
+            "eligibleUnits": 2,
+            "chargedEvents": 0,
+            "enabled": false
+          }
+        }
+      },
+      {
+        "profile": "epss_churn",
+        "synthetic": true,
+        "networkRequests": 0,
+        "wireCalls": 247,
+        "rateLimitSleepsSkipped": true,
+        "limitation": "Core pipeline with synthetic DNS/HTTP/storage; runtime is not live throughput or an Apify bill.",
+        "domainsCompleted": 6,
+        "wallSeconds": 0.877,
+        "maxRecordBytes": 3968546,
+        "totalRecordBytes": 23811276,
+        "findingsAssessed": 12000,
+        "findingsRetained": 12000,
+        "truncatedRecords": 6,
+        "analysisLimited": 0,
+        "diagnostics": {
+          "domainsSubmitted": 6,
+          "domainsUnique": 6,
+          "domainsAnalyzed": 6,
+          "domainsWithObservations": 6,
+          "shodanRequests": 6,
+          "shodanResultsConsumed": 6,
+          "shodanSearchPages": 0,
+          "dnsOperations": 12,
+          "kevRefreshes": 1,
+          "epssRequests": 240,
+          "cveRequests": 0,
+          "cacheHits": 0,
+          "cacheMisses": 12007,
+          "cacheStaleFallbacks": 0,
+          "cacheEvictions": 2000,
+          "retries": 0,
+          "domainsResumed": 0,
+          "recordsTruncated": 6,
+          "runtimeSeconds": 0.877,
+          "peakMemoryBytes": 140251136,
+          "errors": {},
+          "resumed": false,
+          "usageMayBeIncomplete": false,
+          "apify": null,
+          "cost": {
+            "actualMarginalCostPerDomainUsd": null,
+            "observedApifyUsagePerDomainUsd": null,
+            "status": "incomplete",
+            "explanation": "Final Apify charges and customer Shodan costs are not available in-run. Usage is a snapshot, not final marginal cost. BYO Shodan charges are excluded."
+          },
+          "billing": {
+            "unit": "domain_analyzed",
+            "eligibleUnits": 6,
+            "chargedEvents": 0,
+            "enabled": false
+          }
+        }
+      }
+    ]
+  }
+}

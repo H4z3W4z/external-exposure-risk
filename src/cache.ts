@@ -1,5 +1,6 @@
 import type { Metrics } from './metrics.js';
 import type { SourceInfo } from './models.js';
+import { BoundedCache } from './bounded-cache.js';
 export const DAY_MS = 86_400_000;
 export interface CacheEntry<T> { value: T; fetchedAt: string }
 export interface CacheStore {
@@ -7,7 +8,7 @@ export interface CacheStore {
   set(key: string, entry: unknown): Promise<void>;
 }
 export class MemoryCache implements CacheStore {
-  entries = new Map<string, unknown>();
+  entries = new BoundedCache<unknown>();
   async get(key: string) { return this.entries.get(key) ?? null; }
   async set(key: string, entry: unknown) { this.entries.set(key, entry); }
 }

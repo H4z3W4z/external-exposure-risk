@@ -24,5 +24,11 @@ test('real Actor lifecycle writes Dataset, SUMMARY and DIAGNOSTICS without secre
     assert.equal(JSON.parse(diagnostics).shodanRequests, 1);
     assert.equal(JSON.parse(diagnostics).domainsAnalyzed, 2);
     assert.ok(![r.stdout, r.stderr, JSON.stringify(record), summary, diagnostics].some(s => s.includes(secret)));
+    // Keep the same default stores to simulate resuming this run after a restart.
+    await exec(process.execPath, ['--import', 'tsx', '--import', './tests/actor-network.mjs', 'src/main.ts'], { env: { ...env, CRAWLEE_PURGE_ON_START: 'false' }, timeout: 30000 });
+    const resumedFiles = (await readdir(join(dir, 'datasets/default'))).filter(n => n.endsWith('.json') && !n.startsWith('__'));
+    assert.equal(resumedFiles.length, 2);
+    const resumed = JSON.parse(await readFile(join(dir, 'key_value_stores/default/DIAGNOSTICS.json'), 'utf8'));
+    assert.equal(resumed.domainsResumed, 2); assert.equal(resumed.shodanRequests, 1); assert.equal(resumed.usageMayBeIncomplete, true);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

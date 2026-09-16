@@ -178,5 +178,16 @@
     "DNS and historical hostnames associate infrastructure with a domain; they do not prove ownership. Shared hosting/CDNs may expose unrelated services.",
     "SYNTHETIC DEMO: no network calls were made; this is not an assessment of example.com or a real CVE."
   ],
-  "humanSummary": "example.com — ok\n1 assets; 1 services; 1 CVE associations (1 unique); 1 KEV matches; 1 fresh high-EPSS associations.\nInvestigate first:\n- HIGH_PRIORITY: 203.0.113.10:443/tcp — CVE-2024-0001; confidence HIGH. Exact CVE match in CISA KEV indicates known exploitation in the wild. Investigate applicability promptly. This does not confirm exploitation or vulnerability of this endpoint. CISA reports known ransomware campaign use of this CVE. Last observed: 2026-09-14T12:00:00.000Z (1 day ago). Verify current exposure, asset ownership, installed version, affected-version range, configuration, and remediation status. Follow vendor guidance if affected.\nCaveats:\n- DNS and historical hostnames associate infrastructure with a domain; they do not prove ownership. Shared hosting/CDNs may expose unrelated services.\n- SYNTHETIC DEMO: no network calls were made; this is not an assessment of example.com or a real CVE.\nObservation data: Shodan. Shodan retains ownership and copyright in its materials. Prioritization is independently derived; no endorsement is implied."
+  "humanSummary": "example.com — ok\n1 assets; 1 services; 1 CVE associations (1 unique); 1 KEV matches; 1 fresh high-EPSS associations.\nInvestigate first:\n- HIGH_PRIORITY: 203.0.113.10:443/tcp — CVE-2024-0001; confidence HIGH. Exact CVE match in CISA KEV indicates known exploitation in the wild. Investigate applicability promptly. This does not confirm exploitation or vulnerability of this endpoint. CISA reports known ransomware campaign use of this CVE. Last observed: 2026-09-14T12:00:00.000Z (1 day ago). Verify current exposure, asset ownership, installed version, affected-version range, configuration, and remediation status. Follow vendor guidance if affected.\nCaveats:\n- DNS and historical hostnames associate infrastructure with a domain; they do not prove ownership. Shared hosting/CDNs may expose unrelated services.\n- SYNTHETIC DEMO: no network calls were made; this is not an assessment of example.com or a real CVE.\nObservation data: Shodan. Shodan retains ownership and copyright in its materials. Prioritization is independently derived; no endorsement is implied.",
+  "output": {
+    "truncated": false,
+    "limitBytes": 4000000,
+    "serializedBytes": 5594,
+    "findingsAssessed": 1,
+    "findingsRetained": 1,
+    "findingsOmitted": 0,
+    "assetsOmitted": 0,
+    "summaryScope": "assessed_observations",
+    "analysisLimited": false
+  }
 }

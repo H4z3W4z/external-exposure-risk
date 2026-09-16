@@ -4,7 +4,7 @@ import type { Confidence, Evidence, Intelligence, Priority, PriorityFinding, Ser
 import { DAY_MS } from './cache.js';
 
 export const priorityOrder: Record<Priority, number> = { CRITICAL_PRIORITY: 0, HIGH_PRIORITY: 1, MEDIUM_PRIORITY: 2, INFORMATIONAL: 3, INSUFFICIENT_EVIDENCE: 4 };
-export function prioritize(domain: string, service: ServiceObservation, intel: Intelligence, input: Input, analyzedAt: string): PriorityFinding[] {
+export function* iterateFindings(domain: string, service: ServiceObservation, intel: Intelligence, input: Input, analyzedAt: string): Generator<PriorityFinding> {
   const observed = service.observedAt ? Date.parse(service.observedAt) : NaN;
   const age = (Date.parse(analyzedAt) - observed) / DAY_MS;
   const dated = Number.isFinite(age) && age >= 0;
@@ -12,7 +12,7 @@ export function prioritize(domain: string, service: ServiceObservation, intel: I
   const uncertain = stale || service.conflictingEvidence || service.scope === 'host';
   const host = service.hostnames.filter(h => h === domain || h.endsWith(`.${domain}`)).sort()[0] ?? domain;
   const cvs = service.associations.length ? service.associations : [{ cve: null, providerVerified: null }];
-  return cvs.map(association => {
+  for (const association of cvs) {
     const cve = association.cve;
     const kev = cve ? intel.kev[cve] : undefined;
     const epss = cve ? intel.epss[cve] : undefined;
@@ -55,14 +55,17 @@ export function prioritize(domain: string, service: ServiceObservation, intel: I
       details: { ...kev, sourceState: intel.kevSource.state, correlationMethod: 'EXACT_CVE' } });
     if (epss) evidence.push({ source: 'FIRST EPSS', url: `https://api.first.org/data/v1/epss?cve=${cve}`, fetchedAt: intel.epssSources[cve!]?.fetchedAt ?? null,
       observedAt: epss.date, details: { ...epss, sourceState: intel.epssSources[cve!]?.state ?? 'unavailable', correlationMethod: 'EXACT_CVE' } });
-    return { id: createHash('sha256').update([domain, service.ip, service.port, service.transport, service.scope, cve].join('|')).digest('hex').slice(0, 20),
+    yield { id: createHash('sha256').update([domain, service.ip, service.port, service.transport, service.scope, cve].join('|')).digest('hex').slice(0, 20),
       priority, host, ip: service.ip, port: service.port, transport: service.transport, product: service.product, version: service.version,
       cpe: service.cpe, cve, cisaKev: cve ? kevStatus : null, knownRansomwareUse: kev?.knownRansomwareCampaignUse === 'Known' ? true : null,
       epss: epss?.probability ?? null, epssPercentile: epss?.percentile ?? null, epssDate: epss?.date ?? null,
       confidence, confidenceRationale, applicability: cve ? 'ASSOCIATED' : 'OBSERVED', correlationMethod: cve ? 'EXACT_CVE' : 'OBSERVATION_ONLY',
       observationSource: 'Shodan', observedAt: service.observedAt, observationAgeDays: dated ? Math.floor(age) : null,
       stale, reason, recommendedAction: cve ? 'Verify current exposure, asset ownership, installed version, affected-version range, configuration, and remediation status. Follow vendor guidance if affected.' : 'Verify current exposure and business need. Review access restrictions and patch status.', evidence };
-  });
+  }
+}
+export function prioritize(domain: string, service: ServiceObservation, intel: Intelligence, input: Input, analyzedAt: string): PriorityFinding[] {
+  return [...iterateFindings(domain, service, intel, input, analyzedAt)];
 }
 export function sortFindings(findings: PriorityFinding[]): PriorityFinding[] {
   return findings.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority] ||

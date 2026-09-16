@@ -8,7 +8,7 @@ export class HttpClient implements JsonHttp {
   private nextShodanAt = 0;
   constructor(private metrics: Metrics, private fetcher: typeof fetch = fetch,
     private sleep: (ms: number) => Promise<void> = ms => new Promise(r => setTimeout(r, ms)),
-    private shodanIntervalMs = 1100) {}
+    private shodanIntervalMs = 1100, private timeoutMs = 20_000) {}
   async get(url: string, provider: ProviderName): Promise<unknown> {
     for (let attempt = 0; attempt < 3; attempt++) {
       if (provider === 'shodan') {
@@ -20,7 +20,7 @@ export class HttpClient implements JsonHttp {
       this.metrics.counts[counter[provider]]++;
       let retryMs = 500 * 2 ** attempt;
       try {
-        const response = await this.fetcher(url, { signal: AbortSignal.timeout(20_000), redirect: 'error', headers: { Accept: 'application/json' } });
+        const response = await this.fetcher(url, { signal: AbortSignal.timeout(this.timeoutMs), redirect: 'error', headers: { Accept: 'application/json' } });
         if (!response.ok) {
           const seconds = Number(response.headers.get('retry-after'));
           if (Number.isFinite(seconds) && seconds > 0) retryMs = Math.min(30_000, seconds * 1000);

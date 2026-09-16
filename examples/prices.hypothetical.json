@@ -1,0 +1,8 @@
+{
+  "label": "HYPOTHETICAL EXAMPLE ONLY — replace every rate with your own assumptions",
+  "allocatedMemoryMb": 256,
+  "computeUsdPerCu": 0.5,
+  "shodanUsdPerRequest": 0.001,
+  "shodanUsdPerSearchPage": 0.01,
+  "otherRunUsd": 0
+}

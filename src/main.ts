@@ -7,8 +7,8 @@ import { DnsResolver } from './discovery/dns.js';
 import { ShodanProvider } from './providers/shodan.js';
 import { KevProvider } from './providers/cisa-kev.js';
 import { EpssProvider } from './providers/epss.js';
-import { analyzeDomain } from './analyze.js';
 import { redact } from './security.js';
+import { runPortfolio, InterruptedRun, type RunState, type CompletedDomain } from './portfolio.js';
 
 await Actor.main(async () => {
   const metrics = new Metrics();
@@ -31,18 +31,28 @@ await Actor.main(async () => {
     const http = new HttpClient(metrics);
     const deps = { dns: new DnsResolver(metrics), shodan: new ShodanProvider(http, key, metrics),
       kev: new KevProvider(http, cache, metrics), epss: new EpssProvider(http, cache, metrics), metrics };
-    const summaries: string[] = [];
-    for (const domain of input.domains) {
-      const record = redact(await analyzeDomain(domain, input, deps), secrets);
-      await Actor.pushData(record);
-      summaries.push(record.humanSummary);
+    const dataset = await Actor.openDataset();
+    let stopping = false;
+    const stop = () => { stopping = true; };
+    process.once('SIGTERM', stop); process.once('SIGINT', stop);
+    Actor.on('migrating', stop); Actor.on('aborting', stop);
+    try { await runPortfolio(input, deps, {
+      state: () => Actor.getValue<RunState>('RUN_STATE'),
+      saveState: state => Actor.setValue('RUN_STATE', state),
+      completed: async () => {
+        const result = await dataset.getData({ limit: 101, fields: ['domain', 'humanSummary', 'summary'] });
+        if (result.total > 100) throw new InputError('Existing Dataset exceeds this run\'s domain limit. Use fresh storage.');
+        return result.items as unknown as CompletedDomain[];
+      },
+      push: record => Actor.pushData(record),
+      summary: text => Actor.setValue('SUMMARY', text, { contentType: 'text/plain; charset=utf-8' }),
+    }, secrets, () => stopping, record => {
       log.info(`Analyzed domain ${metrics.counts.domainsAnalyzed}/${input.domains.length}: ${record.status}; ${record.summary.highPriority} high-priority findings.`);
-    }
-    await Actor.setValue('SUMMARY', summaries.join('\n\n'), { contentType: 'text/plain; charset=utf-8' });
+    }); } finally { process.removeListener('SIGTERM', stop); process.removeListener('SIGINT', stop); }
   } catch (error) {
-    metrics.error(error instanceof InputError ? 'run.INVALID_INPUT' : 'run.FAILED');
+    metrics.error(error instanceof InputError ? 'run.INVALID_INPUT' : error instanceof InterruptedRun ? 'run.INTERRUPTED' : 'run.FAILED');
     // SDK would otherwise serialize arbitrary exceptions (including HTTP URLs or input).
-    throw new Error(error instanceof InputError ? error.message : 'Actor failed. Inspect DIAGNOSTICS for sanitized error counts.');
+    throw new Error(error instanceof InputError || error instanceof InterruptedRun ? error.message : 'Actor failed. Inspect DIAGNOSTICS for sanitized error counts.');
   } finally {
     let platform: { computeUnits: number | null; usageTotalUsd: number | null } | null = null;
     if (Actor.isAtHome() && process.env.ACTOR_RUN_ID) {

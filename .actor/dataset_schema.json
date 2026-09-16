@@ -12,7 +12,8 @@
       "assets",
       "sources",
       "warnings",
-      "humanSummary"
+      "humanSummary",
+      "output"
     ],
     "properties": {
       "schemaVersion": {
@@ -369,6 +370,55 @@
       },
       "humanSummary": {
         "type": "string"
+      },
+      "output": {
+        "type": "object",
+        "required": [
+          "truncated",
+          "limitBytes",
+          "serializedBytes",
+          "summaryScope",
+          "analysisLimited",
+          "findingsAssessed",
+          "findingsRetained",
+          "findingsOmitted",
+          "assetsOmitted"
+        ],
+        "properties": {
+          "truncated": {
+            "type": "boolean"
+          },
+          "limitBytes": {
+            "type": "integer",
+            "minimum": 32000
+          },
+          "serializedBytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "summaryScope": {
+            "const": "assessed_observations"
+          },
+          "analysisLimited": {
+            "type": "boolean"
+          },
+          "findingsAssessed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "findingsRetained": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "findingsOmitted": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "assetsOmitted": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
       }
     }
   },
@@ -384,7 +434,9 @@
           "summary.cveAssociations",
           "summary.kevMatches",
           "summary.highPriority",
-          "humanSummary"
+          "humanSummary",
+          "output.truncated",
+          "output.findingsOmitted"
         ]
       },
       "display": {
@@ -413,6 +465,12 @@
           },
           "humanSummary": {
             "label": "humanSummary"
+          },
+          "output.truncated": {
+            "label": "truncated"
+          },
+          "output.findingsOmitted": {
+            "label": "findingsOmitted"
           }
         }
       }

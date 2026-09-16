@@ -52,4 +52,6 @@ export interface DomainRecord {
   priorities: PriorityFinding[]; assets: Asset[];
   sources: { dns: { resolvedAt: string; addresses: string[] }; shodan: { fetchedAt: string; state: 'available' | 'partial' | 'unavailable'; attribution: string }; kev: SourceInfo; epss: Record<string, SourceInfo> };
   warnings: string[]; humanSummary: string;
+  output?: { truncated: boolean; limitBytes: number; serializedBytes: number; findingsAssessed: number;
+    findingsRetained: number; findingsOmitted: number; assetsOmitted: number; summaryScope: 'assessed_observations'; analysisLimited: boolean };
 }

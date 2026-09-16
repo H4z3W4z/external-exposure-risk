@@ -4,7 +4,7 @@ Turn externally observable attack-surface data into prioritized security risk us
 
 This Apify Actor answers: **Which externally observable exposures deserve attention first, and why?** It combines existing service observations with exact CVE intelligence, produces explainable priorities, and preserves the evidence needed to investigate. It makes no requests to target HTTP/TLS services and performs no active scans.
 
-**Status:** V1 implementation with automated offline tests and public-source smoke verification. Live customer-key Shodan and hosted Apify acceptance runs are still required. Paid public release is gated on the [Shodan licensing review](docs/SHODAN_LICENSING.md).
+**Status:** V1 implementation with 94 automated tests, bounded portfolio stress verification, recovery support, deployment preparation, and public-source smoke verification. Live customer-key Shodan and hosted Apify acceptance runs are still required. Paid public release is gated on the [Shodan licensing review](docs/SHODAN_LICENSING.md).
 
 ## What it does
 
@@ -70,11 +70,11 @@ Apify encrypts secret inputs and decrypts them inside `Actor.getInput()`; see [s
 | `staleAfterDays` | `30` | 1–365; older observations cannot receive high priority |
 | `highEpssThreshold` | `0.9` | Probability, not percentile; range 0–1 |
 
-Limits produce warnings and partial status. Domains are processed sequentially; Shodan request starts are spaced by at least 1.1 seconds. Network/429/5xx failures receive at most two retries, with capped backoff; each attempt counts toward usage. Repeated authentication/access/rate-limit failure disables further Shodan requests for the run. Shared IPs are looked up once per run, and public intelligence is reused.
+Limits produce warnings and partial status. Domains are processed sequentially; Shodan request starts are spaced by at least 1.1 seconds. Network/429/5xx failures receive at most two retries, with capped backoff; each attempt counts toward usage. Repeated authentication/access/rate-limit failure disables further Shodan requests for the run. Shared IPs and public intelligence are reused while present in bounded memory caches; eviction can cause additional requests. Fixed per-domain analysis and output budgets apply even when input caps are raised; see [operating limits](docs/OPERATIONS.md).
 
 ## Output and interpretation
 
-Each domain record contains `schemaVersion`, `domain`, `analyzedAt`, `status`, `summary`, `priorities`, `assets`, `sources`, `warnings`, and `humanSummary`. Findings include endpoint, product/version/CPE, CVE, KEV status, ransomware context, EPSS probability/percentile/date, priority, confidence rationale, observation age, correlation method, and evidence URLs/timestamps.
+Each domain record contains `schemaVersion`, `domain`, `analyzedAt`, `status`, `summary`, `priorities`, `assets`, `sources`, `warnings`, `humanSummary`, and `output`. The `output` metadata reports byte limits, omitted findings/assets, and whether analysis stopped at a budget. Records stay at or below 4,000,000 UTF-8 bytes; retained findings keep their evidence. Summary counts cover all assessed observations, including omitted detail. Findings include endpoint, product/version/CPE, CVE, KEV status, ransomware context, EPSS probability/percentile/date, priority, confidence rationale, observation age, correlation method, and evidence URLs/timestamps.
 
 An abbreviated **synthetic** finding:
 
@@ -133,6 +133,8 @@ Public KEV/EPSS results are cached for 24 hours in the caller's named `external-
 
 Pay Per Event preparation uses `domain_analyzed` as the intended future unit and tracks observed-domain eligibility. **No charging events are enabled and no retail price is finalized.** Related-host search can consume Shodan credits; see [Shodan credit rules](https://help.shodan.io/the-basics/credit-types-explained). Set caps and confirm your account's entitlements before large portfolios.
 
+The offline cost calculator accepts your rates or final expenses and reports unknown totals as `null`. Deployment automation prepares a private Actor build pinned to a Git commit. See [operations, recovery, deployment, and cost commands](docs/OPERATIONS.md).
+
 ## API, bulk and agents
 
 After deployment, send the same input to your Actor's Apify API. For example, using a secret environment variable and a non-secret `APIFY_ACTOR_ID` (`owner~actor-name`):
@@ -167,6 +169,6 @@ No exploitation, payload delivery, credential testing, brute force, authenticati
 
 ## Development and verification
 
-`npm run check` runs strict TypeScript checking and offline tests, including the actual Apify lifecycle with mocked network responses. `npm run smoke:public` makes DNS, KEV and EPSS calls without Shodan credentials. `docker build -t external-exposure-risk:local .` builds the production container; `npm run smoke:docker` tests it with networking disabled and synthetic fixtures under a 256 MB limit. GitHub Actions runs checks, the container build, and that container smoke test on pushes and pull requests.
+`npm run check` runs strict TypeScript checking and offline tests, including the actual Apify lifecycle with mocked network responses. `npm run smoke:public` makes DNS, KEV and EPSS calls without Shodan credentials. `docker build -t external-exposure-risk:local .` builds the production container; `npm run smoke:docker` tests it with networking disabled and synthetic fixtures under a 256 MB limit. `npm run qa` runs the full sequence plus four bounded-memory stress profiles, deployment dry run, cost CLI verification, dependency review, and source credential checks. GitHub Actions runs the same QA command on pushes and pull requests and uploads its reports. Docker is required for full QA.
 
-See [BUILD_NOTES.md](BUILD_NOTES.md) for measured results, unresolved release items, and the scoped dependency advisory. The repository's Apache 2.0 license applies to this code, not to Shodan data or other third-party content.
+See the [QA report](docs/QA_REPORT.md) and [BUILD_NOTES.md](BUILD_NOTES.md) for measured results, unresolved release items, and the scoped dependency advisory. The repository's Apache 2.0 license applies to this code, not to Shodan data or other third-party content.

@@ -15,10 +15,15 @@
     "check": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit && npm test",
     "demo": "tsx scripts/demo.ts",
     "smoke:public": "tsx scripts/smoke-public.ts",
-    "smoke:docker": "node scripts/smoke-docker.mjs"
+    "smoke:docker": "node scripts/smoke-docker.mjs",
+    "cost": "tsx scripts/cost.ts",
+    "deploy": "tsx scripts/deploy.ts",
+    "stress": "node scripts/stress.mjs",
+    "qa": "node scripts/qa.mjs"
   },
   "dependencies": {
     "apify": "3.7.2",
+    "apify-client": "2.25.0",
     "ipaddr.js": "2.2.0"
   },
   "devDependencies": {
