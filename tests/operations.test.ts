@@ -40,7 +40,7 @@ function deploymentApi(): { api: DeploymentApi; calls: string[] } {
   return { api, calls };
 }
 test('deployment plan pins immutable source and cannot contain URL credentials', () => {
-  assert.ok(plan.gitRepoUrl.endsWith('#' + 'a'.repeat(40))); assert.equal(plan.applyEnvVarsToBuild, false); assert.equal(plan.runAutomatically, false);
+  assert.ok(plan.tarballUrl.endsWith('/archive/' + 'a'.repeat(40) + '.zip')); assert.equal(plan.applyEnvVarsToBuild, false); assert.equal(plan.runAutomatically, false);
   for (const repo of ['https://secret@github.com/u/r','http://github.com/u/r','https://evil.test/u/r','https://github.com/u/r?token=x']) assert.throws(() => deploymentPlan(repo, 'a'.repeat(40)));
   assert.throws(() => deploymentPlan(plan.repository, 'main'));
 });
@@ -54,10 +54,21 @@ test('deployment updates matching source and refuses public or unrelated existin
   api.getActor = async () => ({ id: 'existing', isPublic: false });
   api.getVersion = async () => ({ sourceType: 'GIT_REPO', gitRepoUrl: 'https://github.com/other/project.git#main' });
   await assert.rejects(applyDeployment(plan, api)); assert.deepEqual(calls, []);
-  api.getVersion = async () => ({ sourceType: 'GIT_REPO', gitRepoUrl: plan.gitRepoUrl });
+  api.getVersion = async () => ({ sourceType: 'GIT_REPO', gitRepoUrl: plan.repository + '.git#main' });
   await applyDeployment(plan, api); assert.deepEqual(calls, ['version','build']);
 });
 test('ambiguous deployment mutations are not automatically retried', async () => {
   const { api, calls } = deploymentApi(); api.createActor = async () => { calls.push('create'); throw new Error('timeout'); };
   await assert.rejects(applyDeployment(plan, api)); assert.deepEqual(calls, ['create']);
+});
+
+test('deployment updates only archives pinned to the same repository', async () => {
+  const { api, calls } = deploymentApi(); api.getActor = async () => ({ id: 'existing', isPublic: false });
+  for (const tarballUrl of ['https://github.com/other/repo/archive/' + 'a'.repeat(40) + '.zip', plan.repository + '/archive/main.zip', plan.tarballUrl + '?redirect=other']) {
+    api.getVersion = async () => ({ sourceType: 'TARBALL', tarballUrl });
+    await assert.rejects(applyDeployment(plan, api));
+  }
+  assert.deepEqual(calls, []);
+  api.getVersion = async () => ({ sourceType: 'TARBALL', tarballUrl: plan.tarballUrl });
+  await applyDeployment(plan, api); assert.deepEqual(calls, ['version', 'build']);
 });

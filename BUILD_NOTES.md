@@ -42,3 +42,7 @@
 ## V2 if demand appears
 
 First add recurring exposure/KEV deltas, then larger portfolios and webhooks. Independent vendor/CPE affected-version evaluation should precede critical classifications. Keep the provider-neutral correlation engine reusable for defensive change monitoring; defer UI, extra providers and active scanning.
+
+## Hosted deployment follow-up
+
+On 2026-09-16, both supplied API credentials authenticated. The Shodan credential is restricted by user instruction to testing. The first private hosted build exposed that Apify Git source fragments resolve branches/tags rather than raw commit hashes. Deployment now uses a GitHub ZIP archive pinned to the full commit SHA, with matching-source validation and a regression test. Hosted acceptance results will be recorded after verification.

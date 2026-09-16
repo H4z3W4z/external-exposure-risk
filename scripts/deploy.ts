@@ -1,7 +1,7 @@
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { ApifyClient } from 'apify';
-import { ActorSourceType, type ActorVersionGitRepo } from 'apify-client';
+import { ActorSourceType, type ActorVersionTarball } from 'apify-client';
 import { deploymentPlan, applyDeployment } from '../src/deployment.js';
 
 try {
@@ -20,7 +20,7 @@ try {
     const client = new ApifyClient({ token: process.env.APIFY_TOKEN, maxRetries: 0, timeoutSecs: 30 });
     const user = await client.user('me').get();
     if (!user?.username) throw new Error('Unable to determine the Apify account.');
-    const source: ActorVersionGitRepo = { versionNumber: plan.version, sourceType: ActorSourceType.GitRepo, gitRepoUrl: plan.gitRepoUrl, buildTag: plan.buildTag, applyEnvVarsToBuild: false };
+    const source: ActorVersionTarball = { versionNumber: plan.version, sourceType: ActorSourceType.Tarball, tarballUrl: plan.tarballUrl, buildTag: plan.buildTag, applyEnvVarsToBuild: false };
     const result = await applyDeployment(plan, {
       getActor: async name => { const a = await client.actor(`${user.username}~${name}`).get(); return a ? { id: a.id, isPublic: a.isPublic } : undefined; },
       createActor: async () => client.actors().create({ name: plan.name, title: 'External Exposure Risk Actor', isPublic: false, versions: [source] }),

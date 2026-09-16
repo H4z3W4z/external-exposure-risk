@@ -8,3 +8,5 @@ Never log input credentials, provider URLs containing keys, raw provider errors 
 Run `npm run check` and `npm run build` before committing changes.
 Record scope decisions and actual verification results in BUILD_NOTES.md.
 Keep public release gated on Shodan licensing review and live Apify verification.
+
+The Shodan credential supplied for acceptance testing is test-only. Never configure it as a production default; production requires a replacement customer/runtime key.

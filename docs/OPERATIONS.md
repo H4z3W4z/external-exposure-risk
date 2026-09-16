@@ -9,7 +9,7 @@ npm ci --ignore-scripts
 npm run qa
 ```
 
-QA runs 94 offline tests and strict type checks, builds production code and Docker, exercises the real SDK lifecycle, runs four synthetic portfolio profiles under a 256 MB container limit, prepares a deployment plan, tests the cost CLI, reviews dependency advisories, and checks source for credential patterns. Builds and dependency audit need public network access; test providers are synthetic and stress containers have networking disabled. QA does not call Shodan or create an Apify Actor. GitHub Actions uploads `artifacts/` as `qa-reports`, including JSON results and test logs.
+QA runs 95 offline tests and strict type checks, builds production code and Docker, exercises the real SDK lifecycle, runs four synthetic portfolio profiles under a 256 MB container limit, prepares a deployment plan, tests the cost CLI, reviews dependency advisories, and checks source for credential patterns. Builds and dependency audit need public network access; test providers are synthetic and stress containers have networking disabled. QA does not call Shodan or create an Apify Actor. GitHub Actions uploads `artifacts/` as `qa-reports`, including JSON results and test logs.
 
 `npm run stress` alone requires an existing `external-exposure-risk:local` image. `npm run smoke:public` independently exercises real DNS, CISA KEV, and EPSS. Local `artifacts/`, storage, and environment files are ignored by Git.
 
@@ -39,7 +39,7 @@ Recovery assumes one writer. It does not implement distributed exactly-once tran
 npm run deploy
 ```
 
-This dry run writes `artifacts/deploy-plan.json` without account credentials. It pins the source to local Git HEAD, uses the manifest name/version, sets the Actor private, disables build-time environment variables, and does not start runs. `DEPLOY_REPOSITORY` and `DEPLOY_ACTOR_NAME` optionally select another GitHub source/name. The repository must be readable by the hosted builder. Commit and push all changes before applying; the CLI requires a clean working tree but does not prove the remote contains your commit.
+This dry run writes `artifacts/deploy-plan.json` without account credentials. It uses a GitHub ZIP archive pinned to local Git HEAD, uses the manifest name/version, sets the Actor private, disables build-time environment variables, and does not start runs. `DEPLOY_REPOSITORY` and `DEPLOY_ACTOR_NAME` optionally select another GitHub source/name. The repository archive must be readable by the hosted builder. Apify Git source fragments accept branches/tags rather than raw commit hashes, so the deployment uses its ZIP archive source type. Commit and push all changes before applying; the CLI requires a clean working tree but does not prove the remote contains your commit.
 
 To create/update the private Actor and start a build, supply an Apify token in the environment:
 
@@ -50,7 +50,7 @@ npm run deploy -- --apply
 unset APIFY_TOKEN
 ```
 
-Apply creates the named private Actor or updates the matching repository version of an existing private Actor. It refuses public Actors and conflicting version sources. SDK mutations are not automatically retried: after an ambiguous failure, inspect the account before retrying. `artifacts/deployment.json` records the Actor/build IDs and console URL. `build_started` means accepted for building; it does not mean the build succeeded. Inspect the build result in Apify, then configure the Shodan runtime secret and perform acceptance runs. This automation does not publish, configure billing, inject Shodan credentials, or run targets. Hosted build/run verification and licensing review remain release gates.
+Apply creates the named private Actor or updates the matching repository archive version (or migrates an existing Git source for that repository) of an existing private Actor. It refuses public Actors and conflicting version sources. SDK mutations are not automatically retried: after an ambiguous failure, inspect the account before retrying. `artifacts/deployment.json` records the Actor/build IDs and console URL. `build_started` means accepted for building; it does not mean the build succeeded. Inspect the build result in Apify, then configure the Shodan runtime secret and perform acceptance runs. This automation does not publish, configure billing, inject Shodan credentials, or run targets. Hosted build/run verification and licensing review remain release gates.
 
 ## Cost calculator
 
@@ -74,3 +74,5 @@ The included prices are invented test assumptions, not provider quotations. Copy
 Modeled compute is `allocatedMemoryMb / 1024 × runtimeSeconds / 3600 × computeUsdPerCu`. Modeled Shodan expense adds request and page charges. Use explicit zero where your plan bundles a component to avoid double counting. Subscription allocation is a caller assumption, not measured incremental expense. Measured pipeline runtime can omit billable startup/shutdown and interruption work; reconcile final platform charges when available.
 
 Missing required prices produce `totalUsd: null` with a `missing` list and a known subtotal. Invalid/negative/nonfinite prices or counters fail. Per-domain costs use all analyzed domains; a second denominator uses domains with observations. Zero denominators return null. Estimates are labeled `estimate_from_user_supplied_rates`; providing all three final expense fields yields `user_supplied_final_costs`. Neither result calculates margin or establishes a retail price.
+
+The Shodan credential supplied for acceptance testing is test-only. Supply a replacement production/customer key at runtime before production use; never promote the test key into Actor defaults, environment configuration, source, or build settings.
